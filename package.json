@@ -1,5 +1,5 @@
 {
-  "name": "@tcgre/logging",
+  "name": "tcgre-logging",
   "version": "1.0.0",
   "description": "A logging module for all the tcg js application",
   "author": "subhro-acharjee-tcgre",
@@ -20,5 +20,8 @@
     "lint": "tsc",
     "release": "pnpm run build && changeset publish",
     "test": "jest"
+  },
+  "repository": {
+    "url": "git+https://github.com/subhro-acharjee-tcgls/logging-module.git"
   }
 }
