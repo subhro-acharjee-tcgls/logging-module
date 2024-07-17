@@ -1,7 +1,8 @@
-import { log, transports } from "winston";
+import { transports } from "winston";
 import type LoggerInstance from "../../src/interfaces/log.interface";
 import { LogsProvider } from "../../src/lib/logger";
 import ContextGenerator from "../../src/lib/context-generator";
+import { v4 } from "uuid";
 
 describe("Logger", () => {
   describe("isSilent", () => {
@@ -179,8 +180,9 @@ describe("Logger", () => {
   });
 
   describe("getLoggerInstance", () => {
+    const ctxName = "TestCTX";
+    const loggerInstance = LogsProvider.getLoggerInstance(ctxName);
     it("should return a object of LogInterface type", () => {
-      const instance = LogsProvider.getLoggerInstance("test");
       const keysOfLogInterface: (keyof LoggerInstance)[] = [
         "warn",
         "info",
@@ -189,9 +191,110 @@ describe("Logger", () => {
         "fatal",
       ];
       for (const key of keysOfLogInterface) {
-        expect(instance[key]).toBeDefined();
-        expect(typeof instance[key] === "function").toBeTruthy();
+        expect(loggerInstance[key]).toBeDefined();
+        expect(typeof loggerInstance[key] === "function").toBeTruthy();
       }
+    });
+
+    describe("test for each log fns", () => {
+      const mockLogger = {
+        log: jest.fn(),
+      };
+      const providerInstance = LogsProvider.getInstance();
+
+      beforeEach(() => {
+        mockLogger.log = jest.fn();
+
+        LogsProvider.setLogger(mockLogger as any);
+      });
+      describe("debug", () => {
+        it("should call log method of winston with all data", () => {
+          const mockData = {
+            foo: "bar",
+            id: v4(),
+          };
+          const message = "Some Debug Data";
+          loggerInstance.debug(message, mockData);
+          const args = [message, mockData];
+          providerInstance.dataParser(args);
+          expect(mockLogger.log).toHaveBeenLastCalledWith({
+            level: "debug",
+            message: args.join(" "),
+            caller: ctxName,
+            metadata: expect.any(String),
+          });
+        });
+      });
+
+      describe("error", () => {
+        it("should call log method of winston with all data", () => {
+          const mockData = {
+            foo: "bar",
+            id: v4(),
+          };
+          const message = "Some Debug Data";
+          const error = new Error("ERROR!!");
+          loggerInstance.error(message, mockData, error);
+          const args = [message, mockData, error];
+          providerInstance.dataParser(args);
+          expect(mockLogger.log).toHaveBeenLastCalledWith({
+            level: "error",
+            message: args.join(" "),
+            caller: ctxName,
+            metadata: expect.any(String),
+          });
+        });
+      });
+
+      describe("info", () => {
+        it("should call log method of winston with all data", () => {
+          const message = "Some Debug Data";
+          loggerInstance.info(message);
+          expect(mockLogger.log).toHaveBeenLastCalledWith({
+            level: "info",
+            data: "",
+            message,
+            caller: ctxName,
+            metadata: expect.any(String),
+          });
+        });
+      });
+
+      describe("fatal", () => {
+        it("should call log method of winston with all data", () => {
+          const mockData = {
+            foo: "bar",
+            id: v4(),
+          };
+          const error = new Error("ERROR!");
+          const message = "Some Debug Data";
+
+          loggerInstance.fatal(message, mockData, error);
+          const args = [mockData, error];
+          providerInstance.dataParser(args);
+          expect(mockLogger.log).toHaveBeenLastCalledWith({
+            level: "fatal",
+            message,
+            data: args.join(" "),
+            caller: ctxName,
+            metadata: expect.any(String),
+          });
+        });
+      });
+
+      describe("warn", () => {
+        it("should call log method of winston with all data", () => {
+          const message = "Some Debug Data";
+          loggerInstance.warn(message);
+
+          expect(mockLogger.log).toHaveBeenLastCalledWith({
+            level: "warn",
+            message: message,
+            caller: ctxName,
+            metadata: expect.any(String),
+          });
+        });
+      });
     });
   });
 
@@ -215,21 +318,46 @@ describe("Logger", () => {
       service.dataParser(data);
       expect(data[1]).toEqual(JSON.stringify({ invalid: "json" }, null));
     });
-
-    describe("test for each log fns", () => {
-      const mockLogger = {
-        log: jest.fn(),
-      };
-      const instance = LogsProvider.getInstance();
-
-      beforeEach(() => {
-        mockLogger.log = jest.fn();
-        jest
-          .spyOn(instance, "logger", "get")
-          .mockReturnValueOnce(mockLogger as any);
-      });
-    });
   });
 
-  describe("getLogsMetadata", () => {});
+  describe("getLogsMetadata", () => {
+    class MockApp {
+      callback?: (
+        req: { method: string; path: string },
+        res: unknown,
+        next: Function
+      ) => void;
+      use(cb: any) {
+        this.callback = cb;
+      }
+    }
+
+    it("should provide with request context in metadata", () => {
+      const mockApp = new MockApp();
+      LogsProvider.addRequestScope(mockApp as any);
+      if (mockApp.callback)
+        mockApp.callback(
+          {
+            path: "mock-path",
+            method: "mock-method",
+          },
+          null,
+          () => {
+            const metadata = JSON.parse(
+              LogsProvider.getInstance().getLogsMetadata()
+            );
+            expect(metadata).toBeDefined();
+            expect(metadata["requestId"]).toEqual(expect.any(String));
+          }
+        );
+    });
+
+    it("should provide applicationName when set", () => {
+      const appName = "appName";
+      LogsProvider.setApplicationName(appName);
+      const metadata = JSON.parse(LogsProvider.getInstance().getLogsMetadata());
+      expect(metadata).toBeDefined();
+      expect(metadata["applicationName"]).toEqual(appName);
+    });
+  });
 });

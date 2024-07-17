@@ -18,6 +18,12 @@ export class LogsProvider {
     return !!process.env["LOG_SILENT"];
   }
 
+  static setLogger(logger: Logger) {
+    if (LogsProvider.instance) {
+      LogsProvider.instance.logger = logger;
+    }
+  }
+
   public static getInstance(opts?: LoggerOptions) {
     let config: LoggerOptions = {};
     if (opts) config = opts;
@@ -113,6 +119,7 @@ export class LogsProvider {
           level: "fatal",
           message: message,
           data: args.join(" "),
+          caller: ctxName,
           metadata,
         });
       }
