@@ -199,6 +199,7 @@ describe("Logger", () => {
     describe("test for each log fns", () => {
       const mockLogger = {
         log: jest.fn(),
+        defaultMeta: undefined,
       };
       const providerInstance = LogsProvider.getInstance();
 
@@ -217,11 +218,11 @@ describe("Logger", () => {
           loggerInstance.debug(message, mockData);
           const args = [message, mockData];
           providerInstance.dataParser(args);
+          expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "debug",
             message: args.join(" "),
             caller: ctxName,
-            metadata: expect.any(String),
           });
         });
       });
@@ -237,11 +238,11 @@ describe("Logger", () => {
           loggerInstance.error(message, mockData, error);
           const args = [message, mockData, error];
           providerInstance.dataParser(args);
+          expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "error",
             message: args.join(" "),
             caller: ctxName,
-            metadata: expect.any(String),
           });
         });
       });
@@ -250,12 +251,12 @@ describe("Logger", () => {
         it("should call log method of winston with all data", () => {
           const message = "Some Debug Data";
           loggerInstance.info(message);
+          expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "info",
             data: "",
             message,
             caller: ctxName,
-            metadata: expect.any(String),
           });
         });
       });
@@ -272,12 +273,12 @@ describe("Logger", () => {
           loggerInstance.fatal(message, mockData, error);
           const args = [mockData, error];
           providerInstance.dataParser(args);
+          expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "fatal",
             message,
             data: args.join(" "),
             caller: ctxName,
-            metadata: expect.any(String),
           });
         });
       });
@@ -286,12 +287,11 @@ describe("Logger", () => {
         it("should call log method of winston with all data", () => {
           const message = "Some Debug Data";
           loggerInstance.warn(message);
-
+          expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "warn",
             message: message,
             caller: ctxName,
-            metadata: expect.any(String),
           });
         });
       });

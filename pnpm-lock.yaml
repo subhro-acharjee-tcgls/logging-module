@@ -29,6 +29,12 @@ importers:
       path:
         specifier: ^0.12.7
         version: 0.12.7
+      reflect:
+        specifier: ^0.1.3
+        version: 0.1.3
+      rxjs:
+        specifier: ^7.8.1
+        version: 7.8.1
       uuid:
         specifier: ^10.0.0
         version: 10.0.0
@@ -45,9 +51,15 @@ importers:
       '@types/jest':
         specifier: ^29.5.12
         version: 29.5.12
+      '@types/rx':
+        specifier: ^4.1.4
+        version: 4.1.4
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@12.20.55)
+      reflect-metadata:
+        specifier: ^0.2.2
+        version: 0.2.2
       ts-jest:
         specifier: ^29.2.2
         version: 29.2.2(@babel/core@7.24.8)(@jest/transform@29.7.0)(@jest/types@29.6.3)(babel-jest@29.7.0(@babel/core@7.24.8))(esbuild@0.21.5)(jest@29.7.0(@types/node@12.20.55))(typescript@5.5.3)
@@ -698,6 +710,45 @@ packages:
 
   '@types/range-parser@1.2.7':
     resolution: {integrity: sha512-hKormJbkJqzQGhziax5PItDUTMAM9uE2XXQmM37dyd4hVM+5aVl7oVxMVUiVQn2oCQFN/LKCZdvSM0pFRqbSmQ==}
+
+  '@types/rx-core-binding@4.0.7':
+    resolution: {integrity: sha512-Lj4YEEGLaQndB2CQ0s7rNJGud8fzg/S2WL1XU3RwJjk7mwLQd8CzU+Suvzsh4NyjlU9eTb4Zj4I0QZ3sfmGS7g==}
+
+  '@types/rx-core@4.0.6':
+    resolution: {integrity: sha512-x4VqenExHPSDWLQLl0G8YE/KQWNzK3aXf2Twg7hoEjlFXUbOprX3aMl2jPdoLoOKl/gGEo0PLZ2K9Te5rN2lWw==}
+
+  '@types/rx-lite-aggregates@4.0.6':
+    resolution: {integrity: sha512-JaJpAxKNGhzFqgpeVfhjrd9/ig2FSJmJUnptsSXDxNELSoufnv4b3h43TjBeiC7coi0Xr/stT/Qk1R70FTUgog==}
+
+  '@types/rx-lite-async@4.0.5':
+    resolution: {integrity: sha512-OjSFuusAEZYX04g5xx85yIxXuE4Ray2mM7Riww2oZ25Kg9FtfieocrxIMWHgOR555QlLQySV0949HRdou02Lvw==}
+
+  '@types/rx-lite-backpressure@4.0.5':
+    resolution: {integrity: sha512-jIXkD5io4LqkXYxg01ldqWgSlS9qRi6fFZOUaLSA/Id0higxiwEZqFjxA2KTofCgENv5IJvyGK4RiAH5o/phsQ==}
+
+  '@types/rx-lite-coincidence@4.0.6':
+    resolution: {integrity: sha512-GLSu07SnRI2cZkgNFMO/adu3zFR9A0bTb3uP//66XrSlrygH91hVot5NQrFsmwxixfJ6pFU9WcWAEVCK6Sdi1A==}
+
+  '@types/rx-lite-experimental@4.0.4':
+    resolution: {integrity: sha512-7I99UJN8PtiiUDAXiuYPHtEKLEPw2KzUouf+b4xpN73hMa2uqpDUCCI4uuPzJH0M/g+ULJSTzb1V7Tmqy0oDVg==}
+
+  '@types/rx-lite-joinpatterns@4.0.4':
+    resolution: {integrity: sha512-9GHyCl/IROLg4BscYf8N/b0TiRmkXcQOefXCcsdXz1sJ0oWK5VZaoGlSaeC2uCZSU2cSq2HvGA5jv32d0HS+DQ==}
+
+  '@types/rx-lite-testing@4.0.4':
+    resolution: {integrity: sha512-zT9QpeNHQhekh0CTOurnH692ADSn7koCVYZoFqOL4RPuvJcG/M8DBAF2VTzOpQuDyLiu6sQafRw2oop10xKJRw==}
+
+  '@types/rx-lite-time@4.0.6':
+    resolution: {integrity: sha512-bEDm22LwRlW4RtMKn+ALz79Esc6Bur5nj8hVOf7PLd9xCZLu1xEbcgY9692luhDKry9r7A8GUecfYwm1U9FW1A==}
+
+  '@types/rx-lite-virtualtime@4.0.6':
+    resolution: {integrity: sha512-AAsV20sdLpusZN0SdN8tJld4iUQUGUrBWX99qIh6Gh7ke9EkbNaCo2O+8+fpYtHSN6THG2M6Zc+x2a9TMVvlhg==}
+
+  '@types/rx-lite@4.0.10':
+    resolution: {integrity: sha512-KAUn8LFfEMGwI8vSet+L0PyHT1gacz4/Pz1a3gmL7FtTKW+f12WJH1OocjAGJAos9cQ7SgVFV0E//RzZAkakYQ==}
+
+  '@types/rx@4.1.4':
+    resolution: {integrity: sha512-lCvPzEJKD5MJsOvCRk0RciRmER+BLmk9Z/EKgpYBkj6imocWPTDQ9WRM988icVmbXzsJ3Ffw3fnyIz+6geogAg==}
 
   '@types/semver@7.5.8':
     resolution: {integrity: sha512-I8EUhyrgfLrcTkzV3TSsGyl1tSuPrEDzr0yd5m90UgNxQkyDXULk3b6MlQqTCpZpNtWe1K0hzclnZkTcLBe2UQ==}
@@ -1998,6 +2049,13 @@ packages:
     resolution: {integrity: sha512-hOS089on8RduqdbhvQ5Z37A0ESjsqz6qnRcffsMU3495FuTdqSm+7bhJ29JvIOsBDEEnan5DPu9t3To9VRlMzA==}
     engines: {node: '>=8.10.0'}
 
+  reflect-metadata@0.2.2:
+    resolution: {integrity: sha512-urBwgfrvVP/eAyXx4hluJivBKzuEbSQs9rKWCrCkbSxNv8mxPcUZKeuoF3Uy4mJl3Lwprp6yy5/39VWigZ4K6Q==}
+
+  reflect@0.1.3:
+    resolution: {integrity: sha512-2c5cybmpJqWWnz7PviqZZXGtYBQ3EaFAjNFPug/5tnFvC53WXPoNjpLlgzr9W3VyzY8Em9DWump40PySN1sKrw==}
+    engines: {node: '>= 0.4'}
+
   regenerator-runtime@0.14.1:
     resolution: {integrity: sha512-dYnhHh0nJoMfnkZs6GmmhFknAGRrLznOu5nc9ML+EJxGvrx6H7teuevqVqCuPcPK//3eDrrjQhehXVx9cnkGdw==}
 
@@ -2032,6 +2090,9 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
+
+  rxjs@7.8.1:
+    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
 
   safe-buffer@5.2.1:
     resolution: {integrity: sha512-rp3So07KcdmmKbGvgaNxQSJr7bGVSVk5S9Eq1F+ppbRo70+YeaDxkw5Dd8NPN+GD6bjnYm2VuPuCXmpuYvmCXQ==}
@@ -2266,6 +2327,9 @@ packages:
         optional: true
       esbuild:
         optional: true
+
+  tslib@2.6.3:
+    resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
 
   tsup@8.1.0:
     resolution: {integrity: sha512-UFdfCAXukax+U6KzeTNO2kAARHcWxmKsnvSPXUcfA1D+kU05XDccCrkffCQpFaWDsZfV0jMyTsxU39VfCp6EOg==}
@@ -3236,6 +3300,68 @@ snapshots:
   '@types/qs@6.9.15': {}
 
   '@types/range-parser@1.2.7': {}
+
+  '@types/rx-core-binding@4.0.7':
+    dependencies:
+      '@types/rx-core': 4.0.6
+
+  '@types/rx-core@4.0.6': {}
+
+  '@types/rx-lite-aggregates@4.0.6':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite-async@4.0.5':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite-backpressure@4.0.5':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite-coincidence@4.0.6':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite-experimental@4.0.4':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite-joinpatterns@4.0.4':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite-testing@4.0.4':
+    dependencies:
+      '@types/rx-lite-virtualtime': 4.0.6
+
+  '@types/rx-lite-time@4.0.6':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite-virtualtime@4.0.6':
+    dependencies:
+      '@types/rx-lite': 4.0.10
+
+  '@types/rx-lite@4.0.10':
+    dependencies:
+      '@types/rx-core': 4.0.6
+      '@types/rx-core-binding': 4.0.7
+
+  '@types/rx@4.1.4':
+    dependencies:
+      '@types/rx-core': 4.0.6
+      '@types/rx-core-binding': 4.0.7
+      '@types/rx-lite': 4.0.10
+      '@types/rx-lite-aggregates': 4.0.6
+      '@types/rx-lite-async': 4.0.5
+      '@types/rx-lite-backpressure': 4.0.5
+      '@types/rx-lite-coincidence': 4.0.6
+      '@types/rx-lite-experimental': 4.0.4
+      '@types/rx-lite-joinpatterns': 4.0.4
+      '@types/rx-lite-testing': 4.0.4
+      '@types/rx-lite-time': 4.0.6
+      '@types/rx-lite-virtualtime': 4.0.6
 
   '@types/semver@7.5.8': {}
 
@@ -4722,6 +4848,10 @@ snapshots:
     dependencies:
       picomatch: 2.3.1
 
+  reflect-metadata@0.2.2: {}
+
+  reflect@0.1.3: {}
+
   regenerator-runtime@0.14.1: {}
 
   require-directory@2.1.1: {}
@@ -4767,6 +4897,10 @@ snapshots:
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
+
+  rxjs@7.8.1:
+    dependencies:
+      tslib: 2.6.3
 
   safe-buffer@5.2.1: {}
 
@@ -4995,6 +5129,8 @@ snapshots:
       '@jest/types': 29.6.3
       babel-jest: 29.7.0(@babel/core@7.24.8)
       esbuild: 0.21.5
+
+  tslib@2.6.3: {}
 
   tsup@8.1.0(typescript@5.5.3):
     dependencies:

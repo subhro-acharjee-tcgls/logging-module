@@ -3,14 +3,17 @@ import type LoggerInstance from "../interfaces/log.interface";
 import { Express } from "express";
 import { AsyncLocalStorage } from "async_hooks";
 import ContextGenerator from "./context-generator";
+import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
+import StaticImplements from "../decorators/static-implements";
 
+@StaticImplements<LogsProviderInterface>()
 export class LogsProvider {
   private static instance: LogsProvider;
   logger: Logger;
   localStorage?: AsyncLocalStorage<ContextGenerator>;
   applicationName?: string;
 
-  private constructor(config: LoggerOptions) {
+  constructor(config: LoggerOptions) {
     this.logger = new Logger(config);
   }
 
@@ -81,56 +84,56 @@ export class LogsProvider {
         const provider = LogsProvider.getInstance();
         provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
+        provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "debug",
           message: args.join(" "),
           caller: ctxName,
-          metadata,
         });
       }
       error(...args: any[]): void {
         const provider = LogsProvider.getInstance();
         provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
+        provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "error",
           message: args.join(" "),
           caller: ctxName,
-          metadata,
         });
       }
       info(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
         provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
+        provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "info",
           message: message,
           data: args.join(" "),
           caller: ctxName,
-          metadata,
         });
       }
       fatal(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
         provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
+        provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "fatal",
           message: message,
           data: args.join(" "),
           caller: ctxName,
-          metadata,
         });
       }
       warn(message: string): void {
         const provider = LogsProvider.getInstance();
         const metadata = provider.getLogsMetadata();
+        provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "warn",
           message: message,
           caller: ctxName,
-          metadata,
         });
       }
     }
@@ -140,7 +143,7 @@ export class LogsProvider {
 
   dataParser(data: any[]) {
     data.forEach((dt, idx) => {
-      if (typeof dt === "object") {
+      if (typeof dt === "object" && !(dt instanceof Error)) {
         try {
           data[idx] = JSON.stringify(dt, Object.getOwnPropertyNames(dt));
         } catch (error) {
