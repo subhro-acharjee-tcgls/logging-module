@@ -80,49 +80,47 @@ export class LogsProvider {
 
   public static getLoggerInstance(ctxName: string): LoggerInstance {
     class LogInstance implements LoggerInstance {
-      debug(...args: any[]): void {
+      debug(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
-        provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
         provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "debug",
-          message: args.join(" "),
+          message: message || "",
           caller: ctxName,
+          data: args,
         });
       }
-      error(...args: any[]): void {
+      error(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
-        provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
         provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "error",
-          message: args.join(" "),
+          message: message || "",
           caller: ctxName,
+          data: args,
         });
       }
       info(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
-        provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
         provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "info",
           message: message,
-          data: args.join(" "),
+          data: args,
           caller: ctxName,
         });
       }
       fatal(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
-        provider.dataParser(args);
         const metadata = provider.getLogsMetadata();
         provider.logger.defaultMeta = metadata;
         provider.logger.log({
           level: "fatal",
           message: message,
-          data: args.join(" "),
+          data: args,
           caller: ctxName,
         });
       }
@@ -139,18 +137,6 @@ export class LogsProvider {
     }
 
     return new LogInstance();
-  }
-
-  dataParser(data: any[]) {
-    data.forEach((dt, idx) => {
-      if (typeof dt === "object" && !(dt instanceof Error)) {
-        try {
-          data[idx] = JSON.stringify(dt, Object.getOwnPropertyNames(dt));
-        } catch (error) {
-          // keep as it is.
-        }
-      }
-    });
   }
 
   getLogsMetadata() {

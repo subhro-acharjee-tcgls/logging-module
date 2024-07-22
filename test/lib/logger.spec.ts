@@ -201,7 +201,6 @@ describe("Logger", () => {
         log: jest.fn(),
         defaultMeta: undefined,
       };
-      const providerInstance = LogsProvider.getInstance();
 
       beforeEach(() => {
         mockLogger.log = jest.fn();
@@ -216,13 +215,12 @@ describe("Logger", () => {
           };
           const message = "Some Debug Data";
           loggerInstance.debug(message, mockData);
-          const args = [message, mockData];
-          providerInstance.dataParser(args);
           expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "debug",
-            message: args.join(" "),
+            message: message,
             caller: ctxName,
+            data: [mockData],
           });
         });
       });
@@ -236,12 +234,12 @@ describe("Logger", () => {
           const message = "Some Debug Data";
           const error = new Error("ERROR!!");
           loggerInstance.error(message, mockData, error);
-          const args = [message, mockData, error];
-          providerInstance.dataParser(args);
+          const args = [mockData, error];
           expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "error",
-            message: args.join(" "),
+            message: message,
+            data: args,
             caller: ctxName,
           });
         });
@@ -254,7 +252,7 @@ describe("Logger", () => {
           expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "info",
-            data: "",
+            data: [],
             message,
             caller: ctxName,
           });
@@ -272,12 +270,11 @@ describe("Logger", () => {
 
           loggerInstance.fatal(message, mockData, error);
           const args = [mockData, error];
-          providerInstance.dataParser(args);
           expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "fatal",
             message,
-            data: args.join(" "),
+            data: args,
             caller: ctxName,
           });
         });
@@ -295,28 +292,6 @@ describe("Logger", () => {
           });
         });
       });
-    });
-  });
-
-  describe("dataParser", () => {
-    const service = LogsProvider.getInstance();
-    it("should stringify objects in the data array", () => {
-      const data = [{ key: "value" }, "string", 123];
-      service.dataParser(data);
-      expect(data[0]).toEqual('{"key":"value"}');
-    });
-
-    it("should not modify non-object elements in the data array", () => {
-      const data = [{ key: "value" }, "string", 123];
-      service.dataParser(data);
-      expect(data[1]).toEqual("string");
-      expect(data[2]).toEqual(123);
-    });
-
-    it("should handle invalid JSON objects gracefully", () => {
-      const data = [{ key: "value" }, { invalid: "json" }, "string"];
-      service.dataParser(data);
-      expect(data[1]).toEqual(JSON.stringify({ invalid: "json" }, null));
     });
   });
 

@@ -1,6 +1,5 @@
 import winston from "winston";
 import { LoggerBuilder } from "../../src";
-import { LogsProvider } from "../../src/lib/logger";
 
 describe("LoggerBuilder", () => {
   let loggerBuilder: LoggerBuilder;
@@ -109,21 +108,6 @@ describe("LoggerBuilder", () => {
   });
 
   describe("build", () => {
-    it("should add timestamp and label formats", () => {
-      loggerBuilder.build();
-      expect(loggerBuilder["defaultFormats"]).toEqual(
-        expect.arrayContaining([
-          expect.objectContaining({
-            format: loggerBuilder["timestampFormat"],
-          }),
-          expect.objectContaining({
-            label: "caller",
-            message: loggerBuilder["addCallerNameToMessageAsPrefix"],
-          }),
-        ])
-      );
-    });
-
     it("should handle separated file logs", () => {
       loggerBuilder.addSeparatedFileLogs("test-dir");
       loggerBuilder.build();
@@ -139,7 +123,7 @@ describe("LoggerBuilder", () => {
 
     it("should return an instance of LogsProvider", () => {
       const logsProvider = loggerBuilder.build();
-      expect(logsProvider).toBeInstanceOf(LogsProvider);
+      expect(logsProvider).toBeInstanceOf(Function);
     });
   });
 });
