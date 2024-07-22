@@ -5,6 +5,7 @@ import { AsyncLocalStorage } from "async_hooks";
 import ContextGenerator from "./context-generator";
 import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
 import StaticImplements from "../decorators/static-implements";
+import { RequestContextCreatorFunction } from "../types/request-context";
 
 @StaticImplements<LogsProviderInterface>()
 export class LogsProvider {
@@ -42,17 +43,20 @@ export class LogsProvider {
     return LogsProvider.instance;
   }
 
-  public static addRequestScope<T extends Express>(app: T) {
+  public static addRequestScope<T extends Express>(
+    app: T,
+    requestContextBuilder?: RequestContextCreatorFunction
+  ) {
     const instance = LogsProvider.getInstance();
     instance.localStorage = new AsyncLocalStorage();
-    app.use((req, _res, next) => {
+    app.use((req, res, next) => {
       const store = new ContextGenerator();
-      store.setContext({
-        path: req.path,
-        method: req.method,
-      });
+      const newContext = requestContextBuilder
+        ? requestContextBuilder(req, res)
+        : {};
+      store.setContext(newContext);
       if (store.getContext()?.requestId)
-        _res.setHeader("x-request-id", store.getContext()?.requestId || "");
+        res.setHeader("x-request-id", store.getContext()?.requestId || "");
       instance.localStorage?.run(store, () => {
         next();
       });

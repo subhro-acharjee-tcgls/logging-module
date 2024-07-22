@@ -6,7 +6,7 @@ export default class ContextGenerator {
   public getContext() {
     return this._context;
   }
-  public setContext(value: Partial<RequestContext>) {
+  public setContext(value: Record<string, string>) {
     this._context = {
       ...value,
       requestId: v4(),
