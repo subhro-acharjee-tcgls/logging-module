@@ -82,7 +82,9 @@ describe("Logger", () => {
     class MockApp {
       callback?: (
         req: { method: string; path: string },
-        res: unknown,
+        res: {
+          setHeader: any;
+        },
         next: Function
       ) => void;
       use(cb: any) {
@@ -102,7 +104,9 @@ describe("Logger", () => {
             method: "mock",
             path: "mock-log",
           },
-          null,
+          {
+            setHeader: jest.fn(),
+          },
           () => {
             expect(instance.localStorage?.getStore()).toBeDefined();
             expect(instance.localStorage?.getStore()).toBeInstanceOf(
@@ -111,8 +115,41 @@ describe("Logger", () => {
             const ctx = instance.localStorage?.getStore()?.getContext();
             expect(ctx).toBeDefined();
             expect(ctx?.requestId).toBeDefined();
-            expect(ctx?.method).toEqual("mock");
-            expect(ctx?.path).toEqual("mock-log");
+          }
+        );
+    });
+
+    it("should add middleware for request tracking with custom context builder", () => {
+      const mockApp = new MockApp();
+      const instance = LogsProvider.addRequestScope(
+        mockApp as any,
+        (req, _res) => {
+          return {
+            path: req.path,
+            method: req.method,
+          };
+        }
+      ).getInstance();
+      expect(mockApp.callback).toBeDefined();
+      if (mockApp.callback)
+        mockApp.callback(
+          {
+            method: "mock",
+            path: "mock-log",
+          },
+          {
+            setHeader: jest.fn(),
+          },
+          () => {
+            expect(instance.localStorage?.getStore()).toBeDefined();
+            expect(instance.localStorage?.getStore()).toBeInstanceOf(
+              ContextGenerator
+            );
+            const ctx = instance.localStorage?.getStore()?.getContext();
+            expect(ctx).toBeDefined();
+            expect(ctx?.requestId).toBeDefined();
+            expect(ctx?.["path"]).toBeDefined();
+            expect(ctx?.["method"]).toBeDefined();
           }
         );
     });
@@ -299,7 +336,7 @@ describe("Logger", () => {
     class MockApp {
       callback?: (
         req: { method: string; path: string },
-        res: unknown,
+        res: any,
         next: Function
       ) => void;
       use(cb: any) {
@@ -316,7 +353,9 @@ describe("Logger", () => {
             path: "mock-path",
             method: "mock-method",
           },
-          null,
+          {
+            setHeader: jest.fn(),
+          },
           () => {
             const metadata = LogsProvider.getInstance().getLogsMetadata();
             expect(metadata).toBeDefined();

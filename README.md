@@ -150,6 +150,35 @@ async function bootstrap() {
 bootstrap();
 ```
 
+#### Add request context builder
+
+You can add a method that will enable you to select the data related to a
+request that can be added to the logs.
+
+```typescript
+ logProvider = new LoggerBuilder().setCallerPrefix(true).build();
+  const app = await NestFactory.create(AppModule);
+
+  logProvider
+    .addRequestScope(app as any, (req, _res) => {
+     return {
+       path: req.path,
+       method: req.method,
+       someReallyUsefulHeader: req.headers['x-useful-header'],
+     }
+   }) // attaches a request id to all the request.
+    .setLogOnUnhandledExceptions() // attaches logger to unhandled rejections
+    // and unhandled promised.
+    // set application name in case all the logs are collected in the same
+    //place.
+    .setApplicationName("Pg-Backend apis");
+
+  await app.listen(process.env.PORT || 9000);
+}
+
+bootstrap();
+```
+
 ### Add AutoLogs
 
 This will proceed to document all of the methods encapsulated within this class,
