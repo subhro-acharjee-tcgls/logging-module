@@ -47,6 +47,9 @@ bootstrap();
 
 ### Add AutoLogs
 
+This will proceed to document all of the methods encapsulated within this class,
+specifically, it will record the instances of their initiation and termination.
+
 ```typescript
 import { EnableClassLogger } from "tcgre-logging";
 
@@ -59,6 +62,10 @@ class SomeClassWithMethod {
 ```
 
 ### Add Autologs with all params
+
+This will proceed to document all of the methods encapsulated within this class,
+specifically, it will record the instances of their initiation and termination
+but this will also include all the params and return value for those methods
 
 ```typescript
 import { EnableClassLogger } from "tcgre-logging";
