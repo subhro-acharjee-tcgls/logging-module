@@ -27,10 +27,7 @@ export function EnableMethodLogger(logsArgs?: boolean, className?: string) {
       let result: any;
       try {
         logger.info("starting");
-        if (logsArgs)
-          logger.debug("function was called with", {
-            args,
-          });
+        if (logsArgs) logger.debug("function was called with", ...args);
         result = originalMethod.apply(this, args);
 
         if (result instanceof Promise) {
