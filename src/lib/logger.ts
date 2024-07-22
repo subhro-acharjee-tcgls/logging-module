@@ -50,6 +50,8 @@ export class LogsProvider {
         path: req.path,
         method: req.method,
       });
+      if (store.getContext()?.requestId)
+        _res.setHeader("x-request-id", store.getContext()?.requestId || "");
       instance.localStorage?.run(store, () => {
         next();
       });
