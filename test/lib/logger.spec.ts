@@ -318,9 +318,7 @@ describe("Logger", () => {
           },
           null,
           () => {
-            const metadata = JSON.parse(
-              LogsProvider.getInstance().getLogsMetadata()
-            );
+            const metadata = LogsProvider.getInstance().getLogsMetadata();
             expect(metadata).toBeDefined();
             expect(metadata["requestId"]).toEqual(expect.any(String));
           }
@@ -330,7 +328,7 @@ describe("Logger", () => {
     it("should provide applicationName when set", () => {
       const appName = "appName";
       LogsProvider.setApplicationName(appName);
-      const metadata = JSON.parse(LogsProvider.getInstance().getLogsMetadata());
+      const metadata = LogsProvider.getInstance().getLogsMetadata();
       expect(metadata).toBeDefined();
       expect(metadata["applicationName"]).toEqual(appName);
     });

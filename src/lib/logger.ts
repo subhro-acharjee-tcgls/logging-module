@@ -155,6 +155,6 @@ export class LogsProvider {
       metadata["applicationName"] = this.applicationName;
     }
 
-    return JSON.stringify(metadata, Object.getOwnPropertyNames(metadata), 2);
+    return metadata;
   }
 }
