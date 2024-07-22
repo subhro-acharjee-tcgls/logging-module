@@ -103,7 +103,7 @@ export class LoggerBuilder {
   }
 
   build(): LogsProviderInterface {
-    this.defaultFormats.push(
+    this.defaultFormats.unshift(
       format.timestamp({ format: this.timestampFormat }),
       format.label({
         label: "caller",
@@ -117,6 +117,7 @@ export class LoggerBuilder {
       format: format.combine(...this.defaultFormats),
       levels: this.defaultLogLevels,
     };
+
     LogsProvider.getInstance(config);
     return LogsProvider;
   }

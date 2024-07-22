@@ -38,6 +38,7 @@ export class LogsProvider {
     }
 
     LogsProvider.instance = new LogsProvider(config);
+    console.log(LogsProvider.instance.logger.format, "".padEnd(10, "\n"));
     return LogsProvider.instance;
   }
 
