@@ -2,8 +2,7 @@ import winston, { format, LoggerOptions, transports } from "winston";
 import "winston-daily-rotate-file";
 import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
 import { LogsProvider } from "./logger";
-import { LogLevels } from "../types/log-level";
-import { LogType } from "../../dist";
+import { LogLevels, LogType } from "../types/log-level";
 
 /**
  * A builder class for LogsProvider
