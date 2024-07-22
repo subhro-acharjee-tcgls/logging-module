@@ -27,8 +27,8 @@ export class LoggerBuilder {
       fatal: 0,
       error: 1,
       warn: 2,
-      info: 3,
-      debug: 4,
+      debug: 3,
+      info: 4,
     };
   }
 
