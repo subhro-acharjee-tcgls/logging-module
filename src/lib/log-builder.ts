@@ -23,7 +23,19 @@ export class LoggerBuilder {
   constructor() {
     this.timestampFormat = "YYYY MMM DD HH:mm:ss Z";
     this.addCallerNameToMessageAsPrefix = true;
-    this.defaultFormats = [format.json(), format.errors()];
+    this.defaultFormats = [
+      format.json(),
+      format.errors(),
+      format.printf((info) => {
+        const message = info.message;
+        const level = info.level;
+        delete info.message;
+        return JSON.stringify({
+          message: `[${level.toUpperCase()}] ${message}`,
+          ...(info as any),
+        });
+      }),
+    ];
     this.defaultTransport = [
       new transports.Console({
         silent: LogsProvider.isSilent(),
