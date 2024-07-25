@@ -30,10 +30,11 @@ export class LoggerBuilder {
         const message = info.message;
         const level = info.level;
         delete info.message;
-        return JSON.stringify({
+        const options = {
           message: `[${level.toUpperCase()}] ${message}`,
           ...(info as any),
-        });
+        };
+        return JSON.stringify(options, this.getCircularReplacer());
       }),
     ];
     this.defaultTransport = [
@@ -49,6 +50,19 @@ export class LoggerBuilder {
       debug: 4,
     };
     this.defaultLogLevel = "debug";
+  }
+
+  getCircularReplacer() {
+    const seen = new WeakSet();
+    return (_key: any, value: object | null) => {
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return;
+        }
+        seen.add(value);
+      }
+      return value;
+    };
   }
 
   /**
