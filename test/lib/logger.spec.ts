@@ -237,6 +237,7 @@ describe("Logger", () => {
       const mockLogger = {
         log: jest.fn(),
         defaultMeta: undefined,
+        level: "debug",
       };
 
       beforeEach(() => {
@@ -271,7 +272,7 @@ describe("Logger", () => {
           const message = "Some Debug Data";
           const error = new Error("ERROR!!");
           loggerInstance.error(message, mockData, error);
-          const args = [mockData, error];
+          const args = LogsProvider.processExtraArgs([mockData, error]);
           expect(mockLogger["defaultMeta"]).toBeDefined();
           expect(mockLogger.log).toHaveBeenLastCalledWith({
             level: "error",

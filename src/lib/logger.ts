@@ -6,6 +6,7 @@ import ContextGenerator from "./context-generator";
 import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
 import StaticImplements from "../decorators/static-implements";
 import { RequestContextCreatorFunction } from "../types/request-context";
+import _ from "lodash";
 
 @StaticImplements<LogsProviderInterface>()
 export class LogsProvider {
@@ -88,24 +89,30 @@ export class LogsProvider {
     class LogInstance implements LoggerInstance {
       debug(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
+        if (provider.logger.level !== "debug") {
+          return;
+        }
         const metadata = provider.getLogsMetadata();
         provider.logger.defaultMeta = metadata;
+        const data = LogsProvider.processExtraArgs(args);
         provider.logger.log({
           level: "debug",
           message: message || "",
           caller: ctxName,
-          data: args,
+          data,
         });
       }
       error(message: string, ...args: any[]): void {
         const provider = LogsProvider.getInstance();
         const metadata = provider.getLogsMetadata();
         provider.logger.defaultMeta = metadata;
+        const data = LogsProvider.processExtraArgs(args);
+
         provider.logger.log({
           level: "error",
           message: message || "",
           caller: ctxName,
-          data: args,
+          data,
         });
       }
       info(message: string, ...args: any[]): void {
@@ -162,5 +169,35 @@ export class LogsProvider {
     }
 
     return metadata;
+  }
+
+  static processObjects(obj: any, depth: number): any {
+    if (depth === 0) {
+      return "[REDACTED]";
+    }
+    const newObj: any = {};
+    for (let key in obj) {
+      if (typeof obj[key] === "object" && obj[key] !== null) {
+        newObj[key] = this.processObjects(obj[key], depth - 1);
+      } else {
+        newObj[key] = obj[key];
+      }
+    }
+    return newObj;
+  }
+
+  static processExtraArgs(args: any[]) {
+    const processedArgs: any[] = [];
+    for (let data of args) {
+      if (_.isError(data)) {
+        processedArgs.push(`[${data.name}]: ${data.message}`);
+      } else if (typeof data === "object" && data !== null) {
+        processedArgs.push(this.processObjects(data, 2));
+      } else {
+        processedArgs.push(`${data}`);
+      }
+    }
+
+    return processedArgs;
   }
 }

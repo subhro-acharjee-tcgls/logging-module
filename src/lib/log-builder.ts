@@ -24,6 +24,7 @@ export class LoggerBuilder {
     this.timestampFormat = "YYYY MMM DD HH:mm:ss Z";
     this.addCallerNameToMessageAsPrefix = true;
     this.defaultFormats = [
+      format.splat(),
       format.json(),
       format.errors(),
       format.printf((info) => {
