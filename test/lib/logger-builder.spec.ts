@@ -7,13 +7,6 @@ describe("LoggerBuilder", () => {
     loggerBuilder = new LoggerBuilder();
   });
 
-  describe("setCallerPrefix", () => {
-    it("should set the addCallerNameToMessageAsPrefix flag", () => {
-      loggerBuilder.setCallerPrefix(false);
-      expect(loggerBuilder["addCallerNameToMessageAsPrefix"]).toEqual(false);
-    });
-  });
-
   describe("setTimestampFormat", () => {
     it("should set the timestampFormat", () => {
       const format = "YYYY MM DD HH:mm:ss Z";

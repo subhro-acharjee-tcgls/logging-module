@@ -19,7 +19,27 @@ export function EnableMethodLogger(logsArgs?: boolean, className?: string) {
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
-    descriptor.value = function (...args: []) {
+    const fnObj = createFunctionWrapper(
+      propertyName,
+      className,
+      logsArgs,
+      originalMethod
+    );
+
+    descriptor.value = fnObj[propertyName];
+    copyAllMetaDataToWrapper(originalMethod, descriptor);
+
+    return descriptor;
+  };
+}
+function createFunctionWrapper(
+  propertyName: string,
+  className: string | undefined,
+  logsArgs: boolean | undefined,
+  originalMethod: any
+) {
+  return {
+    [propertyName]: function (...args: []) {
       const ctx = `${
         className ? className + "." + propertyName : propertyName
       }`;
@@ -63,9 +83,6 @@ export function EnableMethodLogger(logsArgs?: boolean, className?: string) {
         throw error;
       }
       return result;
-    };
-    copyAllMetaDataToWrapper(originalMethod, descriptor);
-
-    return descriptor;
+    },
   };
 }

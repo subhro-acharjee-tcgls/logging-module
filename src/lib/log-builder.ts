@@ -11,7 +11,6 @@ import { LogLevels, LogType } from "../types/log-level";
  */
 export class LoggerBuilder {
   private timestampFormat: string;
-  private addCallerNameToMessageAsPrefix: boolean;
   private defaultFormats: winston.Logform.Format[];
   private defaultTransport: winston.transport[];
   private defaultLogLevels: LogLevels;
@@ -22,7 +21,6 @@ export class LoggerBuilder {
   };
   constructor() {
     this.timestampFormat = "YYYY MMM DD HH:mm:ss Z";
-    this.addCallerNameToMessageAsPrefix = true;
     this.defaultFormats = [
       format.splat(),
       format.json(),
@@ -67,12 +65,12 @@ export class LoggerBuilder {
   }
 
   /**
+   * @deprecated
    * Sets addCallerNameToMessageAsPrefix property.
    * @param {boolean} [value] - New value.
    * @returns {LoggerBuilder} LoggerBuilder instance.
    */
-  setCallerPrefix(value?: boolean): LoggerBuilder {
-    this.addCallerNameToMessageAsPrefix = value ?? true;
+  setCallerPrefix(_value?: boolean): LoggerBuilder {
     return this;
   }
 
@@ -191,11 +189,7 @@ export class LoggerBuilder {
    */
   build(): LogsProviderInterface {
     this.defaultFormats.unshift(
-      format.timestamp({ format: this.timestampFormat }),
-      format.label({
-        label: "caller",
-        message: this.addCallerNameToMessageAsPrefix,
-      })
+      format.timestamp({ format: this.timestampFormat })
     );
     this.handleSepartedFileLogs();
 
