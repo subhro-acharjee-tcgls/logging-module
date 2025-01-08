@@ -7,10 +7,13 @@ import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
 import StaticImplements from "../decorators/static-implements";
 import { RequestContextCreatorFunction } from "../types/request-context";
 import _ from "lodash";
+import { bootstrapTracing } from "../../tracing";
 
 @StaticImplements<LogsProviderInterface>()
 export class LogsProvider {
   private static instance: LogsProvider;
+  private static tracingSdk: any; 
+  
   logger: Logger;
   localStorage?: AsyncLocalStorage<ContextGenerator>;
   applicationName?: string;
@@ -27,6 +30,25 @@ export class LogsProvider {
     if (LogsProvider.instance) {
       LogsProvider.instance.logger = logger;
     }
+  }
+
+  // Set the tracing SDK 
+  static setTracingSdk(sdk: any) {
+    this.tracingSdk = sdk;
+  }
+
+  // Access the tracing SDK
+  static getTracingSdk() {
+    return this.tracingSdk;
+  }
+
+  // Initialize Tracing SDK after bootstrap
+  static initializeTracing() {
+    bootstrapTracing().then(({ tracer }) => {
+      this.setTracingSdk(tracer);
+    }).catch((error) => {
+      console.error("Failed to initialize tracing", error);
+    });
   }
 
   public static getInstance(opts?: LoggerOptions) {
@@ -147,6 +169,15 @@ export class LogsProvider {
           caller: ctxName,
         });
       }
+      
+      // Span-related methods using the tracing SDK
+      span(name: string, context?: any, ...args: any[]): void {
+        if (LogsProvider.getTracingSdk()) {
+          const span = LogsProvider.getTracingSdk().startSpan(name, context);
+          return span
+          }
+        }
+      
     }
 
     return new LogInstance();

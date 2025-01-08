@@ -1,7 +1,6 @@
-import { trace, SpanStatusCode } from '@opentelemetry/api';
-import "reflect-metadata";
-import { LogsProvider } from "../lib/logger"; 
+import { LogsProvider } from "../lib/logger";
 import { catchError, Observable } from "rxjs";
+import "reflect-metadata";
 
 function copyAllMetaDataToWrapper(
   originalMethod: any,
@@ -20,7 +19,7 @@ export function EnableMethodLogger(logArgs?: boolean, className?: string) {
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
-    const originalMethod = descriptor.value; 
+    const originalMethod = descriptor.value;
 
     const wrappedMethod = createFunctionWrapper(
       propertyKey,
@@ -46,11 +45,11 @@ function createFunctionWrapper(
       const ctx = `${className ? className + "." + propertyName : propertyName}`;
       const logger = LogsProvider.getLoggerInstance(ctx);
 
-      // Initialize OpenTelemetry tracer
-      const tracer = trace.getTracer("default");
-      const span = tracer.startSpan(`${className ? className + "." : ""}${propertyName}`);
-
       let result: any;
+      const spanName = `${className ? className + "." : ""}${propertyName}`;
+      const spanContext = { className, propertyName, args };
+      const span = logger.span(spanName, spanContext); 
+
       try {
         logger.info(`[${ctx}] Starting execution`);
         if (logsArgs) {
@@ -66,31 +65,24 @@ function createFunctionWrapper(
               if (logsArgs) {
                 logger.debug(`[${ctx}] Returned value:`, res);
               }
-              span.setStatus({ code: SpanStatusCode.OK });
-              span.end();
+              // Log span with result
+              if (span) span.end(); 
+              logger.span(spanName, spanContext, { status: 'OK', result: res });
               return res;
             })
             .catch((error) => {
               logger.error(`[${ctx}] Error occurred`, error);
-              span.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: error.message,
-              });
-              span.recordException(error); 
               span.end();
+              logger.span(spanName, spanContext, { status: 'ERROR', error });
               throw error;
             });
         } else if (result instanceof Observable) {
-          result.pipe(
-            catchError((err, caught) => {
+          result = result.pipe(
+            catchError((err) => {
               logger.error(`[${ctx}] Error occurred`, err);
-              span.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: err.message,
-              });
-              span.recordException(err);
               span.end();
-              return caught;
+              logger.span(spanName, spanContext, { status: 'ERROR', error: err });
+              throw err;
             })
           );
         } else {
@@ -98,24 +90,22 @@ function createFunctionWrapper(
           if (logsArgs) {
             logger.debug(`[${ctx}] Returned value:`, result);
           }
-          span.setStatus({ code: SpanStatusCode.OK });
+          // Log span with result
           span.end();
+          logger.span(spanName, spanContext, { status: 'OK', result });
         }
       } catch (error) {
         if (error instanceof Error) {
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: error.message,
-          });
-          span.recordException(error); 
+          logger.error(`[${ctx}] Error occurred`, error);
+          span.end(); 
+  
+          logger.span(`${ctx} Error`, spanContext, { status: 'ERROR', error });
         } else {
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: 'Unknown error occurred', 
-          });
-          span.recordException(new Error('Unknown error occurred'));
+          logger.error(`[${ctx}] Unknown error occurred`);
+          span.end(); 
+          // Log span with error
+          logger.span(`${ctx} Error`, spanContext, { status: 'ERROR', error: new Error('Unknown error occurred') });
         }
-        
       }
 
       return result;

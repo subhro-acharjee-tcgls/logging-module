@@ -3,7 +3,6 @@ import "winston-daily-rotate-file";
 import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
 import { LogsProvider } from "./logger";
 import { LogLevels, LogType } from "../types/log-level";
-
 /**
  * A builder class for LogsProvider
  * @class
@@ -19,6 +18,8 @@ export class LoggerBuilder {
     dirname: string;
     rotate?: string;
   };
+  private tracingEnabled = true;
+  
   constructor() {
     this.timestampFormat = "YYYY MMM DD HH:mm:ss Z";
     this.defaultFormats = [
@@ -183,7 +184,18 @@ export class LoggerBuilder {
     }
   }
 
-  /**
+
+   /**
+   * Sets a callback to determine if tracing is enabled.
+   * @param {() => boolean | Promise<boolean>}
+   * @returns {LoggerBuilder} LoggerBuilder instance.
+   */
+  setTracingEnabled( isEnabled:boolean): LoggerBuilder { // only return boolean
+    
+    this.tracingEnabled = isEnabled;
+    return this;
+  }
+    /**
    * Builds and returns a log provider
    * @returns {LogsProviderInterface} - The log provider.
    */
@@ -192,7 +204,7 @@ export class LoggerBuilder {
       format.timestamp({ format: this.timestampFormat })
     );
     this.handleSepartedFileLogs();
-
+    
     const config: LoggerOptions = {
       transports: this.defaultTransport,
       format: format.combine(...this.defaultFormats),
@@ -201,6 +213,13 @@ export class LoggerBuilder {
     };
 
     LogsProvider.getInstance(config);
+
+    if (this.tracingEnabled) {
+      LogsProvider.initializeTracing();
+
+    } else {
+      console.log('Tracing is disabled.');
+    }
     return LogsProvider;
   }
 }
