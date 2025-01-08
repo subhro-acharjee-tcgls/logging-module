@@ -8,6 +8,7 @@ import StaticImplements from "../decorators/static-implements";
 import { RequestContextCreatorFunction } from "../types/request-context";
 import _ from "lodash";
 import { bootstrapTracing } from "../../tracing";
+import { Span } from "@opentelemetry/api";
 
 @StaticImplements<LogsProviderInterface>()
 export class LogsProvider {
@@ -171,14 +172,14 @@ export class LogsProvider {
       }
       
       // Span-related methods using the tracing SDK
-      span(name: string, context?: any, ...args: any[]): void {
+      span(name: string, context?: any, ...args: any[]): Span{
         if (LogsProvider.getTracingSdk()) {
           const span = LogsProvider.getTracingSdk().startSpan(name, context);
           return span
           }
         }
-      
     }
+    
 
     return new LogInstance();
   }
