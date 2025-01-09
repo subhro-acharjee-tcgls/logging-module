@@ -1,8 +1,8 @@
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc"; // OTLP exporter (supports gRPC)
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"; // OTLP exporter (supports gRPC)
 import { SimpleLogRecordProcessor } from "@opentelemetry/sdk-logs";
-import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-grpc"; // OTLP for logs via gRPC
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http"; // OTLP for logs via gRPC
 import {
   diag,
   DiagConsoleLogger,

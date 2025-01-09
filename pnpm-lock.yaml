@@ -17,16 +17,10 @@ importers:
       '@opentelemetry/exporter-jaeger':
         specifier: ^1.30.0
         version: 1.30.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-logs-otlp-grpc':
-        specifier: ^0.57.0
-        version: 0.57.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-logs-otlp-http':
         specifier: ^0.57.0
         version: 0.57.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-trace-otlp-grpc':
-        specifier: ^0.57.0
-        version: 0.57.0(@opentelemetry/api@1.9.0)
-      '@opentelemetry/exporter-trace-otlp-http':
+      '@opentelemetry/exporter-metrics-otlp-proto':
         specifier: ^0.57.0
         version: 0.57.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-trace-otlp-proto':
@@ -35,9 +29,18 @@ importers:
       '@opentelemetry/sdk-logs':
         specifier: ^0.57.0
         version: 0.57.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-metrics':
+        specifier: ^1.26.0
+        version: 1.30.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-node':
         specifier: ^0.57.0
         version: 0.57.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/sdk-trace-node':
+        specifier: ^1.26.0
+        version: 1.30.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/winston-transport':
+        specifier: ^0.6.0
+        version: 0.6.0
       '@types/express':
         specifier: ^4.17.21
         version: 4.17.21
@@ -618,6 +621,10 @@ packages:
     resolution: {integrity: sha512-oGB+UxlgWcgQkgwo8GcEGwemoTFt3FIO9ababBmaGwXIoBKZ+GTy0pP185beGg7Llih/NSHSV2XAs1lnznocSg==}
     engines: {node: '>= 8'}
 
+  '@opentelemetry/api-logs@0.53.0':
+    resolution: {integrity: sha512-8HArjKx+RaAI8uEIgcORbZIPklyh1YLjPSBus8hjRmvLi6DeFzgOcdZ7KwPabKj8mXF8dX0hyfAyGfycz0DbFw==}
+    engines: {node: '>=14'}
+
   '@opentelemetry/api-logs@0.57.0':
     resolution: {integrity: sha512-l1aJ30CXeauVYaI+btiynHpw341LthkMTv3omi1VJDX14werY2Wmv9n1yudMsq9HuY0m8PvXEVX4d8zxEb+WRg==}
     engines: {node: '>=14'}
@@ -1097,6 +1104,10 @@ packages:
     engines: {node: '>=14'}
     peerDependencies:
       '@opentelemetry/api': ^1.1.0
+
+  '@opentelemetry/winston-transport@0.6.0':
+    resolution: {integrity: sha512-paYrOThvm8cjSB3fQYdRzx+RVTcnTfzqInUH68SEX8frBLyn3FS0KDJJQc3Q3bamfec2J9KEkubHcAzq6OkEVw==}
+    engines: {node: '>=14'}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -3936,6 +3947,10 @@ snapshots:
       '@nodelib/fs.scandir': 2.1.5
       fastq: 1.18.0
 
+  '@opentelemetry/api-logs@0.53.0':
+    dependencies:
+      '@opentelemetry/api': 1.9.0
+
   '@opentelemetry/api-logs@0.57.0':
     dependencies:
       '@opentelemetry/api': 1.9.0
@@ -4635,6 +4650,11 @@ snapshots:
     dependencies:
       '@opentelemetry/api': 1.9.0
       '@opentelemetry/core': 1.30.0(@opentelemetry/api@1.9.0)
+
+  '@opentelemetry/winston-transport@0.6.0':
+    dependencies:
+      '@opentelemetry/api-logs': 0.53.0
+      winston-transport: 4.9.0
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
