@@ -1,6 +1,9 @@
 import { LogsProvider } from "../lib/logger";
 import { catchError, Observable } from "rxjs";
 import "reflect-metadata";
+import { isNil } from "lodash";
+import { SpanStatusCode } from "@opentelemetry/api";
+
 
 function copyAllMetaDataToWrapper(
   originalMethod: any,
@@ -37,7 +40,7 @@ export function EnableMethodLogger(logArgs?: boolean, className?: string) {
 function createFunctionWrapper(
   propertyName: string,
   className: string | undefined,
-  logsArgs: boolean | undefined,
+  logArgs: boolean | undefined,
   originalMethod: any
 ) {
   return {
@@ -52,7 +55,7 @@ function createFunctionWrapper(
 
       try {
         logger.info(`[${ctx}] Starting execution`);
-        if (logsArgs) {
+        if (logArgs) {
           logger.debug(`[${ctx}] Arguments:`, args);
         }
 
@@ -62,49 +65,65 @@ function createFunctionWrapper(
           result = result
             .then((res) => {
               logger.info(`[${ctx}] Ended successfully`);
-              if (logsArgs) {
+              if (logArgs) {
                 logger.debug(`[${ctx}] Returned value:`, res);
               }
               // Log span with result
-              if (span) span.end(); 
-              logger.span(spanName, spanContext, { status: 'OK', result: res });
+              if(!isNil(span)){
+                span.addEvent(`Function${spanName} ended sucessuffully`);
+                span.setStatus({code: SpanStatusCode.OK, message: 'ended successfully'});
+                span.end(); 
+              }
               return res;
             })
             .catch((error) => {
               logger.error(`[${ctx}] Error occurred`, error);
-              span.end();
-              logger.span(spanName, spanContext, { status: 'ERROR', error });
+              if(!isNil(span)){
+                span.addEvent(`Function${spanName} ended with error`, error);
+                span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+                span.end(); 
+              }
               throw error;
             });
         } else if (result instanceof Observable) {
           result = result.pipe(
             catchError((err) => {
               logger.error(`[${ctx}] Error occurred`, err);
-              span.end();
-              logger.span(spanName, spanContext, { status: 'ERROR', error: err });
+              if(!isNil(span)){
+                span.addEvent(`Function${spanName} ended with error`, err);
+                span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+                span.end(); 
+              }
               throw err;
             })
           );
         } else {
           logger.info(`[${ctx}] Ended successfully`);
-          if (logsArgs) {
+          if (logArgs) {
             logger.debug(`[${ctx}] Returned value:`, result);
           }
           // Log span with result
-          span.end();
-          logger.span(spanName, spanContext, { status: 'OK', result });
+          if(!isNil(span)){
+            span.addEvent(`Function${spanName} ended sucessuffully`);
+            span.setStatus({code: SpanStatusCode.OK, message: 'ended successfully'});
+            span.end(); 
+          }
         }
       } catch (error) {
         if (error instanceof Error) {
           logger.error(`[${ctx}] Error occurred`, error);
-          span.end(); 
-  
-          logger.span(`${ctx} Error`, spanContext, { status: 'ERROR', error });
+          if(!isNil(span)){
+            span.addEvent(`Function${spanName} ended with error`);
+            span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+            span.end(); 
+          } 
         } else {
           logger.error(`[${ctx}] Unknown error occurred`);
-          span.end(); 
-          // Log span with error
-          logger.span(`${ctx} Error`, spanContext, { status: 'ERROR', error: new Error('Unknown error occurred') });
+          if(!isNil(span)){
+            span.addEvent(`Function${spanName} ended with error`);
+            span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+            span.end(); 
+          }
         }
       }
 

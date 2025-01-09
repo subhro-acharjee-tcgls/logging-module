@@ -6,7 +6,7 @@ import ContextGenerator from "./context-generator";
 import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
 import StaticImplements from "../decorators/static-implements";
 import { RequestContextCreatorFunction } from "../types/request-context";
-import _ from "lodash";
+import _, { isNil } from "lodash";
 import { bootstrapTracing } from "../../tracing";
 import { Span } from "@opentelemetry/api";
 
@@ -172,15 +172,14 @@ export class LogsProvider {
       }
       
       // Span-related methods using the tracing SDK
-      span(name: string, context?: any, ...args: any[]): Span{
-        if (LogsProvider.getTracingSdk()) {
-          const span = LogsProvider.getTracingSdk().startSpan(name, context);
-          return span
-          }
+      span(name: string, context?: any, ...args: any[]): Span {
+        if (isNil(LogsProvider.getTracingSdk())) {
+          throw new Error('Tracing SDK is not initialized');
         }
+        const span= LogsProvider.getTracingSdk().startSpan(name, context);
+        return span;
+      }
     }
-    
-
     return new LogInstance();
   }
 
