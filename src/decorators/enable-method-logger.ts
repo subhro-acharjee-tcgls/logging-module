@@ -4,7 +4,6 @@ import "reflect-metadata";
 import { isNil } from "lodash";
 import { SpanStatusCode } from "@opentelemetry/api";
 
-
 function copyAllMetaDataToWrapper(
   originalMethod: any,
   descriptorWithNewMethod: PropertyDescriptor
@@ -51,12 +50,21 @@ function createFunctionWrapper(
       let result: any;
       const spanName = `${className ? className + "." : ""}${propertyName}`;
       const spanContext = { className, propertyName, args };
-      const span = logger.span(spanName, spanContext); 
+      const span = logger.span(spanName, spanContext);
 
       try {
         logger.info(`[${ctx}] Starting execution`);
+        span?.setAttributes({
+          className: className || "UnknownClass",
+          propertyName: propertyName || "UnknownProperty",
+          context: ctx
+        });
+
         if (logArgs) {
           logger.debug(`[${ctx}] Arguments:`, args);
+          span?.setAttributes({
+            arguments: JSON.stringify(args),
+          });
         }
 
         result = originalMethod.apply(this, args);
@@ -68,20 +76,34 @@ function createFunctionWrapper(
               if (logArgs) {
                 logger.debug(`[${ctx}] Returned value:`, res);
               }
-              // Log span with result
-              if(!isNil(span)){
-                span.addEvent(`Function${spanName} ended sucessuffully`);
-                span.setStatus({code: SpanStatusCode.OK, message: 'ended successfully'});
-                span.end(); 
+              if (!isNil(span)) {
+                span.addEvent(`Function ${spanName} ended successfully`,{ result });
+                span.setAttributes({
+                  resultType: typeof res,
+                  resultSummary: JSON.stringify(res),
+                });
+                span.setStatus({
+                  code: SpanStatusCode.OK,
+                  message: "ended successfully",
+                });
+                span.end();
               }
               return res;
             })
             .catch((error) => {
               logger.error(`[${ctx}] Error occurred`, error);
-              if(!isNil(span)){
-                span.addEvent(`Function${spanName} ended with error`, error);
-                span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
-                span.end(); 
+              if (!isNil(span)) {
+                span.addEvent(`Function ${spanName} ended with error`);
+                span.setAttributes({
+                  errorName: error.name || "UnknownError",
+                  errorMessage: error.message || "No message",
+                  errorStack: error.stack || "No stack trace",
+                });
+                span.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: "ended with error",
+                });
+                span.end();
               }
               throw error;
             });
@@ -89,10 +111,17 @@ function createFunctionWrapper(
           result = result.pipe(
             catchError((err) => {
               logger.error(`[${ctx}] Error occurred`, err);
-              if(!isNil(span)){
-                span.addEvent(`Function${spanName} ended with error`, err);
-                span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
-                span.end(); 
+              if (!isNil(span)) {
+                span.addEvent(`Function ${spanName} ended with error`,{result});
+                span.setAttributes({
+                  errorName: err.name || "UnknownError",
+                  errorMessage: err.message || "No message",
+                });
+                span.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: "ended with error",
+                });
+                span.end();
               }
               throw err;
             })
@@ -102,27 +131,50 @@ function createFunctionWrapper(
           if (logArgs) {
             logger.debug(`[${ctx}] Returned value:`, result);
           }
-          // Log span with result
-          if(!isNil(span)){
-            span.addEvent(`Function${spanName} ended sucessuffully`);
-            span.setStatus({code: SpanStatusCode.OK, message: 'ended successfully'});
-            span.end(); 
+          if (!isNil(span)) {
+            span.addEvent(`Function ${spanName} ended successfully`);
+            span.setAttributes({
+              resultType: typeof result,
+              resultSummary: Array.isArray(result)
+                ? `Array with ${result.length} items`
+                : JSON.stringify(result),
+            });
+            span.setStatus({
+              code: SpanStatusCode.OK,
+              message: "ended successfully",
+            });
+            span.end();
           }
         }
       } catch (error) {
         if (error instanceof Error) {
           logger.error(`[${ctx}] Error occurred`, error);
-          if(!isNil(span)){
-            span.addEvent(`Function${spanName} ended with error`);
-            span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
-            span.end(); 
-          } 
+          if (!isNil(span)) {
+            span.addEvent(`Function ${spanName} ended with error`);
+            span.setAttributes({
+              errorName: error.name || "UnknownError",
+              errorMessage: error.message || "No message",
+              errorStack: error.stack || "No stack trace",
+            });
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: "ended with error",
+            });
+            span.end();
+          }
         } else {
           logger.error(`[${ctx}] Unknown error occurred`);
-          if(!isNil(span)){
-            span.addEvent(`Function${spanName} ended with error`);
-            span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
-            span.end(); 
+          if (!isNil(span)) {
+            span.addEvent(`Function ${spanName} ended with error`);
+            span.setAttributes({
+              errorType: typeof error,
+              errorValue: JSON.stringify(error),
+            });
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: "ended with error",
+            });
+            span.end();
           }
         }
       }
