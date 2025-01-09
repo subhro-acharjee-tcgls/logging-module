@@ -13,8 +13,8 @@ import { Span } from "@opentelemetry/api";
 @StaticImplements<LogsProviderInterface>()
 export class LogsProvider {
   private static instance: LogsProvider;
-  private static tracingSdk: any; 
-  
+  private static tracingSdk: any;
+
   logger: Logger;
   localStorage?: AsyncLocalStorage<ContextGenerator>;
   applicationName?: string;
@@ -33,7 +33,7 @@ export class LogsProvider {
     }
   }
 
-  // Set the tracing SDK 
+  // Set the tracing SDK
   static setTracingSdk(sdk: any) {
     this.tracingSdk = sdk;
   }
@@ -45,11 +45,14 @@ export class LogsProvider {
 
   // Initialize Tracing SDK after bootstrap
   static initializeTracing() {
-    bootstrapTracing().then(({ tracer }) => {
-      this.setTracingSdk(tracer);
-    }).catch((error) => {
-      console.error("Failed to initialize tracing", error);
-    });
+    bootstrapTracing()
+      .then(({ sdk, tracer }) => {
+        sdk.start();
+        this.setTracingSdk(tracer);
+      })
+      .catch((error) => {
+        console.error("Failed to initialize tracing", error);
+      });
   }
 
   public static getInstance(opts?: LoggerOptions) {
@@ -170,13 +173,13 @@ export class LogsProvider {
           caller: ctxName,
         });
       }
-      
+
       // Span-related methods using the tracing SDK
-      span(name: string, context?: any, ...args: any[]): Span {
+      span(name: string, context?: any): Span {
         if (isNil(LogsProvider.getTracingSdk())) {
-          throw new Error('Tracing SDK is not initialized');
+          throw new Error("Tracing SDK is not initialized");
         }
-        const span= LogsProvider.getTracingSdk().startSpan(name, context);
+        const span = LogsProvider.getTracingSdk().startSpan(name, context);
         return span;
       }
     }
