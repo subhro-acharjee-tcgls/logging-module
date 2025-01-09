@@ -5,5 +5,5 @@ export default interface LoggerInstance {
   info(message: string, ...args: any[]): void;
   fatal(message: string, ...args: any[]): void;
   warn(message: string): void;
-  span(name: string, context?: any): Span;
+  span(name: string, context?: any): Span | null;
 }

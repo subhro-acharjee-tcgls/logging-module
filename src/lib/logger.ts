@@ -175,9 +175,9 @@ export class LogsProvider {
       }
 
       // Span-related methods using the tracing SDK
-      span(name: string, context?: any): Span {
+      span(name: string, context?: any): Span | null {
         if (isNil(LogsProvider.getTracingSdk())) {
-          throw new Error("Tracing SDK is not initialized");
+          return null;
         }
         const span = LogsProvider.getTracingSdk().startSpan(name, context);
         return span;
