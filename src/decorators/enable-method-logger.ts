@@ -1,6 +1,10 @@
-import "reflect-metadata";
 import { LogsProvider } from "../lib/logger";
 import { catchError, Observable } from "rxjs";
+import "reflect-metadata";
+import { isNil } from "lodash";
+import { SpanStatusCode } from "@opentelemetry/api";
+
+
 function copyAllMetaDataToWrapper(
   originalMethod: any,
   descriptorWithNewMethod: PropertyDescriptor
@@ -12,76 +16,117 @@ function copyAllMetaDataToWrapper(
   });
 }
 
-export function EnableMethodLogger(logsArgs?: boolean, className?: string) {
+export function EnableMethodLogger(logArgs?: boolean, className?: string) {
   return function (
     _target: any,
-    propertyName: string,
+    propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
     const originalMethod = descriptor.value;
-    const fnObj = createFunctionWrapper(
-      propertyName,
+
+    const wrappedMethod = createFunctionWrapper(
+      propertyKey,
       className,
-      logsArgs,
+      logArgs,
       originalMethod
     );
 
-    descriptor.value = fnObj[propertyName];
+    descriptor.value = wrappedMethod[propertyKey];
     copyAllMetaDataToWrapper(originalMethod, descriptor);
-
     return descriptor;
   };
 }
+
 function createFunctionWrapper(
   propertyName: string,
   className: string | undefined,
-  logsArgs: boolean | undefined,
+  logArgs: boolean | undefined,
   originalMethod: any
 ) {
   return {
-    [propertyName]: function (...args: []) {
-      const ctx = `${
-        className ? className + "." + propertyName : propertyName
-      }`;
+    [propertyName]: function (...args: any[]) {
+      const ctx = `${className ? className + "." + propertyName : propertyName}`;
       const logger = LogsProvider.getLoggerInstance(ctx);
+
       let result: any;
+      const spanName = `${className ? className + "." : ""}${propertyName}`;
+      const spanContext = { className, propertyName, args };
+      const span = logger.span(spanName, spanContext); 
+
       try {
-        logger.info("starting");
-        if (logsArgs) {
-          logger.debug("function was called with", args);
+        logger.info(`[${ctx}] Starting execution`);
+        if (logArgs) {
+          logger.debug(`[${ctx}] Arguments:`, args);
         }
+
         result = originalMethod.apply(this, args);
 
         if (result instanceof Promise) {
           result = result
             .then((res) => {
-              logger.info(`Ending of method ${propertyName}`);
-              if (logsArgs) {
-                logger.debug(`${propertyName} returned`, res);
+              logger.info(`[${ctx}] Ended successfully`);
+              if (logArgs) {
+                logger.debug(`[${ctx}] Returned value:`, res);
+              }
+              // Log span with result
+              if(!isNil(span)){
+                span.addEvent(`Function${spanName} ended sucessuffully`);
+                span.setStatus({code: SpanStatusCode.OK, message: 'ended successfully'});
+                span.end(); 
               }
               return res;
             })
             .catch((error) => {
-              logger.error(`Error in method ${propertyName}`, error);
+              logger.error(`[${ctx}] Error occurred`, error);
+              if(!isNil(span)){
+                span.addEvent(`Function${spanName} ended with error`, error);
+                span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+                span.end(); 
+              }
               throw error;
             });
         } else if (result instanceof Observable) {
-          result.pipe(
-            catchError((err, caught) => {
-              logger.error(`Error in method ${propertyName}`, err);
-              return caught;
+          result = result.pipe(
+            catchError((err) => {
+              logger.error(`[${ctx}] Error occurred`, err);
+              if(!isNil(span)){
+                span.addEvent(`Function${spanName} ended with error`, err);
+                span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+                span.end(); 
+              }
+              throw err;
             })
           );
         } else {
-          logger.info(`Ending of method ${propertyName}`);
-          if (logsArgs) {
-            logger.debug(`${propertyName} returned`, result);
+          logger.info(`[${ctx}] Ended successfully`);
+          if (logArgs) {
+            logger.debug(`[${ctx}] Returned value:`, result);
+          }
+          // Log span with result
+          if(!isNil(span)){
+            span.addEvent(`Function${spanName} ended sucessuffully`);
+            span.setStatus({code: SpanStatusCode.OK, message: 'ended successfully'});
+            span.end(); 
           }
         }
       } catch (error) {
-        logger.error(`Error in method ${propertyName}`, error);
-        throw error;
+        if (error instanceof Error) {
+          logger.error(`[${ctx}] Error occurred`, error);
+          if(!isNil(span)){
+            span.addEvent(`Function${spanName} ended with error`);
+            span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+            span.end(); 
+          } 
+        } else {
+          logger.error(`[${ctx}] Unknown error occurred`);
+          if(!isNil(span)){
+            span.addEvent(`Function${spanName} ended with error`);
+            span.setStatus({code: SpanStatusCode.ERROR, message: 'ended with error'});
+            span.end(); 
+          }
+        }
       }
+
       return result;
     },
   };
