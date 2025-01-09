@@ -18,8 +18,8 @@ export class LoggerBuilder {
     dirname: string;
     rotate?: string;
   };
-  private tracingEnabled = true;
-  
+  private tracingEnabled = false;
+
   constructor() {
     this.timestampFormat = "YYYY MMM DD HH:mm:ss Z";
     this.defaultFormats = [
@@ -184,18 +184,18 @@ export class LoggerBuilder {
     }
   }
 
-
-   /**
+  /**
    * Sets a callback to determine if tracing is enabled.
    * @param {() => boolean | Promise<boolean>}
    * @returns {LoggerBuilder} LoggerBuilder instance.
    */
-  setTracingEnabled( isEnabled:boolean): LoggerBuilder { // only return boolean
-    
+  setTracingEnabled(isEnabled: boolean): LoggerBuilder {
+    // only return boolean
+
     this.tracingEnabled = isEnabled;
     return this;
   }
-    /**
+  /**
    * Builds and returns a log provider
    * @returns {LogsProviderInterface} - The log provider.
    */
@@ -204,7 +204,7 @@ export class LoggerBuilder {
       format.timestamp({ format: this.timestampFormat })
     );
     this.handleSepartedFileLogs();
-    
+
     const config: LoggerOptions = {
       transports: this.defaultTransport,
       format: format.combine(...this.defaultFormats),
@@ -216,9 +216,8 @@ export class LoggerBuilder {
 
     if (this.tracingEnabled) {
       LogsProvider.initializeTracing();
-
     } else {
-      console.log('Tracing is disabled.');
+      console.log("Tracing is disabled.");
     }
     return LogsProvider;
   }
