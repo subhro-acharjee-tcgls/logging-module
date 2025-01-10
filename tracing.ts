@@ -11,13 +11,9 @@ import {
 } from "@opentelemetry/api";
 
 export async function bootstrapTracing() {
-  console.log("inside bootstrap tracing");
-
   const grpcUrl =
     process.env["OTEL_BASE_URL"] || "grpc://host.docker.internal:4317";
   const serviceName = process.env["SERVICE_NAME"] || " ";
-
-  console.log("Trace exporter URL:", grpcUrl);
 
   // OTLP trace exporter using gRPC (Jaeger gRPC endpoint)
   const traceExporter = new OTLPTraceExporter({ url: grpcUrl });
@@ -42,8 +38,6 @@ export async function bootstrapTracing() {
     instrumentations,
     serviceName: `${process.env["SERVICE_NAME"]}-${process.env["ENV"]}`,
   });
-
-  console.log("OpenTelemetry with OTLP (gRPC to Jaeger) is set up!");
 
   const tracer = trace.getTracer(serviceName);
   diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
