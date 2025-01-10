@@ -1,13 +1,16 @@
 import { NodeSDK } from "@opentelemetry/sdk-node";
 import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"; // OTLP exporter (supports gRPC)
-import { SimpleLogRecordProcessor } from "@opentelemetry/sdk-logs";
+import {
+  ConsoleLogRecordExporter,
+  SimpleLogRecordProcessor,
+} from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http"; // OTLP for logs via gRPC
 import { trace } from "@opentelemetry/api";
 
 export async function bootstrapTracing() {
   const grpcUrl =
-    process.env["OTEL_BASE_URL"] || "grpc://host.docker.internal:4317";
+    process.env["OTEL_BASE_TRACE_URL"] || "grpc://host.docker.internal:4317";
   const serviceName = process.env["SERVICE_NAME"] || " ";
 
   // OTLP trace exporter using gRPC (Jaeger gRPC endpoint)
@@ -26,10 +29,15 @@ export async function bootstrapTracing() {
     url: grpcUrl,
   });
 
+  const consoleLogExporter = new ConsoleLogRecordExporter();
+
   // Create the SDK (without starting it)
   const sdk = new NodeSDK({
     traceExporter,
-    logRecordProcessors: [new SimpleLogRecordProcessor(logExporter)], // Log exporter for logs (optional)
+    logRecordProcessors: [
+      new SimpleLogRecordProcessor(logExporter),
+      new SimpleLogRecordProcessor(consoleLogExporter),
+    ], // Log exporter for logs (optional)
     instrumentations,
     serviceName: `${process.env["SERVICE_NAME"]}-${process.env["ENV"]}`,
   });

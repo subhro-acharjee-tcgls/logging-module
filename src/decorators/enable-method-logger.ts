@@ -44,7 +44,9 @@ function createFunctionWrapper(
 ) {
   return {
     [propertyName]: function (...args: any[]) {
-      const ctx = `${className ? className + "." + propertyName : propertyName}`;
+      const ctx = `${
+        className ? className + "." + propertyName : propertyName
+      }`;
       const logger = LogsProvider.getLoggerInstance(ctx);
 
       let result: any;
@@ -54,17 +56,17 @@ function createFunctionWrapper(
 
       try {
         logger.info(`[${ctx}] Starting execution`);
-        span?.setAttributes({
-          className: className || "UnknownClass",
-          propertyName: propertyName || "UnknownProperty",
-          context: ctx
-        });
+        // span?.setAttributes({
+        //   className: className || "UnknownClass",
+        //   propertyName: propertyName || "UnknownProperty",
+        //   context: ctx
+        // });
 
         if (logArgs) {
           logger.debug(`[${ctx}] Arguments:`, args);
-          span?.setAttributes({
-            arguments: JSON.stringify(args),
-          });
+          // span?.setAttributes({
+          //   arguments: JSON.stringify(args),
+          // });
         }
 
         result = originalMethod.apply(this, args);
@@ -77,11 +79,13 @@ function createFunctionWrapper(
                 logger.debug(`[${ctx}] Returned value:`, res);
               }
               if (!isNil(span)) {
-                span.addEvent(`Function ${spanName} ended successfully`,{ result });
-                span.setAttributes({
-                  resultType: typeof res,
-                  result: JSON.stringify(res),
+                span.addEvent(`Function ${spanName} ended successfully`, {
+                  result,
                 });
+                // span.setAttributes({
+                //   resultType: typeof res,
+                //   result: JSON.stringify(res),
+                // });
                 span.setStatus({
                   code: SpanStatusCode.OK,
                   message: "ended successfully",
@@ -112,7 +116,9 @@ function createFunctionWrapper(
             catchError((err) => {
               logger.error(`[${ctx}] Error occurred`, err);
               if (!isNil(span)) {
-                span.addEvent(`Function ${spanName} ended with error`,{error: err});
+                span.addEvent(`Function ${spanName} ended with error`, {
+                  error: err,
+                });
                 span.setAttributes({
                   errorName: err.name || "Error",
                   errorMessage: err.message || `${err}`,
@@ -133,10 +139,10 @@ function createFunctionWrapper(
           }
           if (!isNil(span)) {
             span.addEvent(`Function ${spanName} ended successfully`);
-            span.setAttributes({
-              resultType: typeof result,
-              result: JSON.stringify(result),
-            });
+            // span.setAttributes({
+            //   resultType: typeof result,
+            //   result: JSON.stringify(result),
+            // });
             span.setStatus({
               code: SpanStatusCode.OK,
               message: "ended successfully",
@@ -149,11 +155,11 @@ function createFunctionWrapper(
           logger.error(`[${ctx}] Error occurred`, error);
           if (!isNil(span)) {
             span.addEvent(`Function ${spanName} ended with error`);
-            span.setAttributes({
-              errorName: error.name || "Error",
-              errorMessage: error.message || `${error}`,
-              errorStack: error.stack || "",
-            });
+            // span.setAttributes({
+            //   errorName: error.name || "Error",
+            //   errorMessage: error.message || `${error}`,
+            //   errorStack: error.stack || "",
+            // });
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: "ended with error",
@@ -164,10 +170,10 @@ function createFunctionWrapper(
           logger.error(`[${ctx}] Unknown error occurred`);
           if (!isNil(span)) {
             span.addEvent(`Function ${spanName} ended with error`);
-            span.setAttributes({
-              errorType: typeof error,
-              errorValue: JSON.stringify(error),
-            });
+            // span.setAttributes({
+            //   errorType: typeof error,
+            //   errorValue: JSON.stringify(error),
+            // });
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: "ended with error",
