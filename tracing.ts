@@ -3,12 +3,7 @@ import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentation
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto"; // OTLP exporter (supports gRPC)
 import { SimpleLogRecordProcessor } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http"; // OTLP for logs via gRPC
-import {
-  diag,
-  DiagConsoleLogger,
-  DiagLogLevel,
-  trace,
-} from "@opentelemetry/api";
+import { trace } from "@opentelemetry/api";
 
 export async function bootstrapTracing() {
   const grpcUrl =
@@ -40,6 +35,6 @@ export async function bootstrapTracing() {
   });
 
   const tracer = trace.getTracer(serviceName);
-  diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
+  // diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.ALL);
   return { sdk, tracer };
 }
