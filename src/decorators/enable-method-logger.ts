@@ -80,7 +80,7 @@ function createFunctionWrapper(
                 span.addEvent(`Function ${spanName} ended successfully`,{ result });
                 span.setAttributes({
                   resultType: typeof res,
-                  resultSummary: JSON.stringify(res),
+                  result: JSON.stringify(res),
                 });
                 span.setStatus({
                   code: SpanStatusCode.OK,
@@ -95,9 +95,9 @@ function createFunctionWrapper(
               if (!isNil(span)) {
                 span.addEvent(`Function ${spanName} ended with error`);
                 span.setAttributes({
-                  errorName: error.name || "UnknownError",
-                  errorMessage: error.message || "No message",
-                  errorStack: error.stack || "No stack trace",
+                  errorName: error.name || "Error",
+                  errorMessage: error.message || `${error}`,
+                  errorStack: error.stack || "",
                 });
                 span.setStatus({
                   code: SpanStatusCode.ERROR,
@@ -112,10 +112,10 @@ function createFunctionWrapper(
             catchError((err) => {
               logger.error(`[${ctx}] Error occurred`, err);
               if (!isNil(span)) {
-                span.addEvent(`Function ${spanName} ended with error`,{result});
+                span.addEvent(`Function ${spanName} ended with error`,{error: err});
                 span.setAttributes({
-                  errorName: err.name || "UnknownError",
-                  errorMessage: err.message || "No message",
+                  errorName: err.name || "Error",
+                  errorMessage: err.message || `${err}`,
                 });
                 span.setStatus({
                   code: SpanStatusCode.ERROR,
@@ -135,9 +135,7 @@ function createFunctionWrapper(
             span.addEvent(`Function ${spanName} ended successfully`);
             span.setAttributes({
               resultType: typeof result,
-              resultSummary: Array.isArray(result)
-                ? `Array with ${result.length} items`
-                : JSON.stringify(result),
+              result: JSON.stringify(result),
             });
             span.setStatus({
               code: SpanStatusCode.OK,
@@ -152,9 +150,9 @@ function createFunctionWrapper(
           if (!isNil(span)) {
             span.addEvent(`Function ${spanName} ended with error`);
             span.setAttributes({
-              errorName: error.name || "UnknownError",
-              errorMessage: error.message || "No message",
-              errorStack: error.stack || "No stack trace",
+              errorName: error.name || "Error",
+              errorMessage: error.message || `${error}`,
+              errorStack: error.stack || "",
             });
             span.setStatus({
               code: SpanStatusCode.ERROR,
