@@ -9,6 +9,7 @@ import { RequestContextCreatorFunction } from "../types/request-context";
 import _, { isNil } from "lodash";
 import { bootstrapTracing } from "../../tracing";
 import { Span } from "@opentelemetry/api";
+import { api } from "@opentelemetry/sdk-node";
 
 @StaticImplements<LogsProviderInterface>()
 export class LogsProvider {
@@ -35,12 +36,12 @@ export class LogsProvider {
 
   // Set the tracing SDK
   static setTracingSdk(sdk: any) {
-    this.tracingSdk = sdk;
+    LogsProvider.tracingSdk = sdk;
   }
 
   // Access the tracing SDK
   static getTracingSdk() {
-    return this.tracingSdk;
+    if (LogsProvider.tracingSdk) return LogsProvider.tracingSdk;
   }
 
   // Initialize Tracing SDK after bootstrap
@@ -200,6 +201,12 @@ export class LogsProvider {
 
     if (this.applicationName) {
       metadata["applicationName"] = this.applicationName;
+    }
+
+    if (LogsProvider.tracingSdk) {
+      metadata["trace_id"] = api.trace.getSpanContext(
+        api.context.active()
+      )?.traceId;
     }
 
     return metadata;
