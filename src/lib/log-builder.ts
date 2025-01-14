@@ -3,6 +3,8 @@ import "winston-daily-rotate-file";
 import { LogsProviderInterface } from "../interfaces/logs-provider.interface";
 import { LogsProvider } from "./logger";
 import { LogLevels, LogType } from "../types/log-level";
+import { isNil } from "lodash";
+import LokiTransport from "winston-loki";
 /**
  * A builder class for LogsProvider
  * @class
@@ -29,10 +31,10 @@ export class LoggerBuilder {
       format.printf((info) => {
         const message = info.message;
         const level = info.level;
-        delete info.message;
+
         const options = {
-          message: `[${level.toUpperCase()}] ${message}`,
           ...(info as any),
+          message: `[${level.toUpperCase()}] ${message}`,
         };
         return JSON.stringify(options, this.getCircularReplacer());
       }),
@@ -204,6 +206,17 @@ export class LoggerBuilder {
       format.timestamp({ format: this.timestampFormat })
     );
     this.handleSepartedFileLogs();
+    if (this.tracingEnabled && !isNil(process.env["LOKI_URL"])) {
+      this.addTransports(
+        new LokiTransport({
+          host: process.env["LOKI_URL"],
+          format: format.combine(...this.defaultFormats),
+          labels: {
+            service_name: `${process.env["SERVICE_NAME"]}-${process.env["ENV"]}`,
+          },
+        })
+      );
+    }
 
     const config: LoggerOptions = {
       transports: this.defaultTransport,

@@ -7,6 +7,7 @@ import {
 } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http"; // OTLP for logs via gRPC
 import { trace } from "@opentelemetry/api";
+import { WinstonInstrumentation } from "@opentelemetry/instrumentation-winston";
 
 export async function bootstrapTracing() {
   const grpcUrl =
@@ -38,7 +39,7 @@ export async function bootstrapTracing() {
       new SimpleLogRecordProcessor(logExporter),
       new SimpleLogRecordProcessor(consoleLogExporter),
     ], // Log exporter for logs (optional)
-    instrumentations,
+    instrumentations: [...instrumentations, new WinstonInstrumentation()],
     serviceName: `${process.env["SERVICE_NAME"]}-${process.env["ENV"]}`,
   });
 
