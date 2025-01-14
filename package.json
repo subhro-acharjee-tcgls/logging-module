@@ -1,6 +1,6 @@
 {
   "name": "tcgre-logging",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A logging module for all the tcg js application",
   "author": "subhro-acharjee-tcgre",
   "license": "MIT",
